@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
-
-function getPlacesApiKey() {
-  return process.env.GOOGLE_MAPS_API_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-}
+import { getFirstServerEnv } from "@/lib/server-env";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const name = url.searchParams.get("name");
   const width = Math.max(240, Math.min(1600, Number(url.searchParams.get("width") ?? 900)));
-  const apiKey = getPlacesApiKey();
+  const apiKey = await getFirstServerEnv("GOOGLE_MAPS_API_KEY", "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY");
 
   if (!apiKey || !name?.startsWith("places/")) {
     return NextResponse.json({ error: "Photo unavailable" }, { status: 400 });

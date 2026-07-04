@@ -1,6 +1,7 @@
 import { Buffer } from "node:buffer";
 import { cafes as seedCafes } from "./cafes";
 import { calculateWorkScore } from "./scoring";
+import { getFirstServerEnv } from "./server-env";
 import type { Cafe, NoiseLevel } from "./types";
 
 type LocalizedText = {
@@ -116,12 +117,8 @@ const fallbackImages = [
 
 let expandedCafeCache: Promise<Cafe[]> | null = null;
 
-function getPlacesApiKey() {
-  return process.env.GOOGLE_MAPS_API_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-}
-
 async function fetchGoogleJson<T>(url: string, init: RequestInit, fieldMask: string) {
-  const apiKey = getPlacesApiKey();
+  const apiKey = await getFirstServerEnv("GOOGLE_MAPS_API_KEY", "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY");
   if (!apiKey) return null;
 
   const response = await fetch(url, {

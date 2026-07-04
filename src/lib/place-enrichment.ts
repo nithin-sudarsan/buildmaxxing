@@ -6,6 +6,7 @@ import {
 } from "./google-cafes";
 import { callOpenRouterJson } from "./openrouter";
 import { calculateWorkScore } from "./scoring";
+import { getFirstServerEnv } from "./server-env";
 import type {
   Cafe,
   CafeAmenity,
@@ -123,10 +124,6 @@ const DETAILS_FIELD_MASK = [
 
 const detailsCache = new Map<string, Promise<CafePlaceDetails>>();
 
-function getPlacesApiKey() {
-  return process.env.GOOGLE_MAPS_API_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-}
-
 function clampScore(value: unknown, fallback: number) {
   const number = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(number)) return fallback;
@@ -158,7 +155,7 @@ function distanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: 
 }
 
 async function fetchJson<T>(url: string, init: RequestInit, fieldMask: string) {
-  const apiKey = getPlacesApiKey();
+  const apiKey = await getFirstServerEnv("GOOGLE_MAPS_API_KEY", "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY");
   if (!apiKey) return null;
 
   const response = await fetch(url, {
